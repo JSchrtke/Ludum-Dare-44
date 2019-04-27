@@ -12,8 +12,11 @@ class Background(arcade.Sprite):
         self.textures.append(texture)
         texture = arcade.load_texture(file_name="green.png")
         self.textures.append(texture)
+        texture = arcade.load_texture(file_name="yellow.png")
+        self.textures.append(texture)
         # set the default texture
         self.set_texture(0)
+        self.texture_increment_counter = 0
 
         # variable to check if texture needs changing
         self.change_texture_flag = False
@@ -29,5 +32,21 @@ class Background(arcade.Sprite):
     def change_texture(self):
         """Changes the texture"""
         if self.change_texture_flag is True:
-            self.select_random_texture()
-            self.change_texture_flag = False
+            if self.texture_increment_counter < len(self.textures) - 1:
+                self.texture_increment_counter += 1
+            else:
+                self.texture_increment_counter = 0
+
+            self.set_texture(self.texture_increment_counter)
+            self.set_texture_change_flag(False)
+
+
+    def set_texture_change_flag(self, Boolean):
+        """Set the texture change flas
+        
+        Parameters
+        ----------
+        Boolean : bool
+            Wether the texture should be changed next update or not
+        """
+        self.change_texture_flag = Boolean
