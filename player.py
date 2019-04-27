@@ -1,6 +1,14 @@
 import arcade
 from game_constants import SCREEN_WIDTH, SCREEN_HEIGHT
 PLAYER_SCALE = 0.1
+FACE_RIGHT = 0
+FACE_LEFT = 1
+BASE_ATTACK_RIGHT = 2
+BASE_ATTACK_LEFT = 3
+RIGHT = 0
+LEFT = 180
+UP = 90
+DOWN = 270
 
 
 class Player(arcade.Sprite):
@@ -9,9 +17,17 @@ class Player(arcade.Sprite):
     def __init__(self):
         super().__init__()
         # load the player texture
-        texture = arcade.load_texture(file_name="pepe.png", scale=PLAYER_SCALE)
+        texture = arcade.load_texture(file_name="pepe_facing_right.png", scale=PLAYER_SCALE)
         self.textures.append(texture)
-        self.set_texture(0)
+        texture = arcade.load_texture(file_name="pepe_facing_left.png", scale=PLAYER_SCALE)
+        self.textures.append(texture)
+        texture = arcade.load_texture(file_name="pepe_facing_right_punching.png", scale=PLAYER_SCALE)
+        self.textures.append(texture)
+        texture = arcade.load_texture(file_name="pepe_facing_left_punching.png", scale=PLAYER_SCALE)
+        self.textures.append(texture)
+
+        # set the default texture
+        self.set_texture(FACE_RIGHT)
         # variable to check if player has hit edge of screen
         self.has_hit_edge = False
 
@@ -21,6 +37,7 @@ class Player(arcade.Sprite):
         self.check_bounds()
         self.center_x += self.change_x
         self.center_y += self.change_y
+        print(self.angle)  # TODO: DEBUG LINE, REMOVE
 
     def move_right(self, speed):
         """Move the player to the right.
@@ -31,6 +48,8 @@ class Player(arcade.Sprite):
             Movement speed in pixels per update
         """
         self.change_x = speed
+        self.angle = RIGHT
+        self.set_texture(FACE_RIGHT)
 
     def move_left(self, speed):
         """Move the player to the left.
@@ -41,6 +60,8 @@ class Player(arcade.Sprite):
             Movement speed in pixels per update
         """
         self.change_x = -speed
+        self.angle = LEFT
+        self.set_texture(FACE_LEFT)
 
     def move_up(self, speed):
         """Move the player to the right.
@@ -51,6 +72,9 @@ class Player(arcade.Sprite):
             Movement speed in pixels per update
         """
         self.change_y = speed
+        self.angle = UP
+        self.set_texture(FACE_RIGHT)
+
 
     def move_down(self, speed):
         """Move the player to the right.
@@ -61,6 +85,8 @@ class Player(arcade.Sprite):
             Movement speed in pixels per update
         """
         self.change_y = -speed
+        self.angle = DOWN
+        self.set_texture(FACE_RIGHT)
 
     def check_bounds(self):
         """Check if player is within allowed movement range."""
@@ -87,6 +113,28 @@ class Player(arcade.Sprite):
             self.bottom = 0
             # set the edge check true
             self.has_hit_edge = True
+
+    def base_attack(self, target_list):
+        """Do a base attack.
+
+        Parameters
+        ----------
+        target_list : arcade.SpriteList
+            List of all the targets that can be attacked
+
+        """
+        if self.angle == LEFT:
+            self.set_texture(BASE_ATTACK_LEFT)
+        else:
+            self.set_texture(BASE_ATTACK_RIGHT)
+        for target in arcade.check_for_collision_with_list(self, target_list):
+            target.got_hit()
+
+    def reset_texture(self):
+        if self.angle == LEFT:
+            self.set_texture(FACE_LEFT)
+        else:
+            self.set_texture(FACE_RIGHT)
 
     def reset(self):
         self.center_x = SCREEN_WIDTH / 2

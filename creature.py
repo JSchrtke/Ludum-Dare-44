@@ -5,14 +5,15 @@ from game_constants import SCREEN_WIDTH, SCREEN_HEIGHT
 CREATURE_SCALE = 0.5
 DEFAULT_VALUE_WHEN_EATEN = 1
 CREATURE_SPEED = 10
+ALIVE = 0
+
 
 class Creature(arcade.Sprite):
     def __init__(self):
         super().__init__()
         self.value_when_eaten = DEFAULT_VALUE_WHEN_EATEN
         self.moving = random.randint(0, 1)
-
-        
+        self.dead = False
 
     def update(self):
         self.check_bounds()
@@ -94,13 +95,19 @@ class Creature(arcade.Sprite):
         self.center_x = SCREEN_WIDTH / random.uniform(1, 10)
         self.center_y = SCREEN_HEIGHT / random.uniform(1, 10)
 
+    def got_hit(self):
+        self.dead = True
+        self.kill()
+
 
 class TestCreature(Creature):
     def __init__(self):
         super().__init__()
-        texture = arcade.load_texture(file_name="test_creature.png", scale=CREATURE_SCALE)
+        texture = arcade.load_texture(
+            file_name="test_creature.png", scale=CREATURE_SCALE
+        )
         self.textures.append(texture)
-        self.set_texture(0)
+        self.set_texture(ALIVE)
         self.value_when_eaten = DEFAULT_VALUE_WHEN_EATEN * 2
 
         self.center_x = SCREEN_WIDTH / random.uniform(1, 10)

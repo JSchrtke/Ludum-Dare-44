@@ -87,7 +87,7 @@ class Game(arcade.Window):
 
     def on_update(self, delta_time):
         """Update the game"""
-        print(self.state) # TODO: DEBUG CODE, REMOVE!
+        #print(self.state) # TODO: DEBUG CODE, REMOVE!
         self.background.update()
         self.player.update()
         self.all_creature_sprites_list.update()
@@ -135,6 +135,8 @@ class Game(arcade.Window):
                 self.player.move_right(PLAYER_MOVEMENT_SPEED)
             if symbol == arcade.key.LEFT:
                 self.player.move_left(PLAYER_MOVEMENT_SPEED)
+            if symbol == arcade.key.SPACE:
+                self.player.base_attack(self.all_creature_sprites_list)
 
         if self.state == GameStates.INGAME_MENU:
             if symbol == arcade.key.ESCAPE:
@@ -164,6 +166,8 @@ class Game(arcade.Window):
                 self.player.move_right(0)
             if symbol == arcade.key.LEFT:
                 self.player.move_left(0)
+            if symbol == arcade.key.SPACE:
+                self.player.reset_texture()
 
     def set_state_change(self, boolean):
         """Set wether or not the state has changed.
