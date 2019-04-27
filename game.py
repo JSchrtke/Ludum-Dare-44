@@ -1,9 +1,9 @@
-# TODO: make obstacles
-# TODO: make score system
-# TODO: MAKE POWERUP SYSTEM
 # TODO: MAKE PAUSE SYSTEM
-# TODO: FIX CREATURES NOT RESPAWNING ON ENVIRONMENT CHANGE
+# TODO: make obstacles
+# TODO: MAKE POWERUP SYSTEM
+# TODO: make score system
 # TODO: add graphics/assets
+# TODO: make and add sound
 # TODO: IF TIME PERMITTING, MAKE actual healthbar
 import arcade
 import os
@@ -13,6 +13,7 @@ from game_constants import (
     SCREEN_HEIGHT,
     SCREEN_NAME,
     PLAYER_MOVEMENT_SPEED,
+    MAX_CREATURE_COUNT
 )
 from game_states import GameStates
 from background import Background
@@ -57,7 +58,6 @@ class Game(arcade.Window):
 
     def setup(self):
         """Set up the game"""
-        self.all_creature_sprites_list = arcade.SpriteList()
         # set the default state
         self.state_change = False
         self.state = GameStates.MAIN_MENU
@@ -78,7 +78,8 @@ class Game(arcade.Window):
         self.player.center_y = SCREEN_HEIGHT / 2
 
         # setup the creatures
-        for i in range(10):
+        self.all_creature_sprites_list = arcade.SpriteList()
+        for i in range(MAX_CREATURE_COUNT):
             creature = TestCreature()
             creature.setup()
             self.all_creature_sprites_list.append(creature)
@@ -102,6 +103,7 @@ class Game(arcade.Window):
 
     def on_update(self, delta_time):
         """Update the game"""
+        print("creature count: {0}".format(len(self.all_creature_sprites_list))) # TODO: DEBUG LINE, REMOVE
         self.background.update()
         self.player.update()
         self.all_creature_sprites_list.update()
@@ -109,10 +111,17 @@ class Game(arcade.Window):
         if self.state == GameStates.MAIN_MENU:
             self.background.reset()
             self.player.reset()
+            self.reset_all_creatures()
             for creature in self.all_creature_sprites_list:
                 creature.reset()
 
+        
+
         if self.state == GameStates.PLAYING:
+        # check if all creatures are gone, so new ones can be spawned
+            if len(self.all_creature_sprites_list) <= 0:
+                self.reset_all_creatures()
+
             # TODO: DEBUG CODE, REMOVE
             #print("player health: {0}".format(self.player.current_health))
             # END OF DEBUG CODE
@@ -125,8 +134,7 @@ class Game(arcade.Window):
 
             if self.player.has_hit_edge is True:
                 self.background.set_texture_change_flag(True)
-                for creature in self.all_creature_sprites_list:
-                    creature.reset()
+                self.reset_all_creatures()
 
         if self.state == GameStates.GAME_OVER:
             print(self.state)
@@ -136,6 +144,9 @@ class Game(arcade.Window):
             self.set_state_change(False)
             self.set_old_state()
             self.update_state()
+
+
+                
 
     def on_key_press(self, symbol, modifiers):
         if self.state == GameStates.MAIN_MENU:
@@ -247,6 +258,17 @@ class Game(arcade.Window):
     def update_state(self):
         """Update the game state to the new state."""
         self.state = self.new_state
+
+    def reset_all_creatures(self):
+        for creature in self.all_creature_sprites_list:
+            creature.kill()
+        for i in range(MAX_CREATURE_COUNT):
+            creature = TestCreature()
+            creature.setup()
+            self.all_creature_sprites_list.append(creature)
+            if len(self.all_creature_sprites_list) >= MAX_CREATURE_COUNT:
+                break
+
 
 
 def main():
