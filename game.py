@@ -1,12 +1,12 @@
 # TODO: make health system
 # TODO: make obstacles
 # TODO: make score system
-# TODO: add graphics/assets
 # TODO: MAKE POWERUP SYSTEM
 # TODO: MAKE PAUSE SYSTEM
 # TODO: FIX CREATURES NOT RESPAWNING ON ENVIRONMENT CHANGE
 # TODO FIX PLAYER MOVING WHEN ATTACKING
-# TODO: MAKE IT SO YOU HAVE TO DOUBLE TAP CREATURES, ONCE TO KILL, SECOND TO EAT. ALSO MAKE IT SO YOU CAN ONLY EAT DEAD CREATURES
+# TODO: add graphics/assets
+# TODO: IF TIME PERMITTING, MAKE HEALTBAR SYSTEM BETTER BY INTERGRATING INTO PLAYER CLASS
 import arcade
 import os
 import random
@@ -50,8 +50,6 @@ class Game(arcade.Window):
         self.player = None
         # list for all creature sprites
         self.all_creature_sprites_list = None
-        # # init variable for the health bar
-        # self.health_bar = None
 
         # variable to check if state has changed
         self.state_change = None
@@ -88,8 +86,7 @@ class Game(arcade.Window):
             creature.setup()
             self.all_creature_sprites_list.append(creature)
 
-        # setup the health bar
-        self.health_bar = HealthBar()
+
 
     def on_draw(self):
         """execute this code whenever window gets drawn"""
@@ -102,7 +99,7 @@ class Game(arcade.Window):
 
         # when the game playing
         if self.state == GameStates.PLAYING:
-            self.health_bar.draw()
+            self.player.display_health()
             self.all_creature_sprites_list.draw()
             self.player.draw()
 
@@ -120,9 +117,9 @@ class Game(arcade.Window):
 
         if self.state == GameStates.PLAYING:
             # TODO: DEBUG CODE, REMOVE
-            # print("player health: {0}".format(self.player.current_health))
+            #print("player health: {0}".format(self.player.current_health))
             # END OF DEBUG CODE
-            self.health_bar.update(self.player)
+
 
             if self.player.check_if_dead():
                 self.set_state_change(True)

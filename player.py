@@ -11,7 +11,8 @@ LEFT = 180
 UP = 90
 DOWN = 270
 MAX_HEALTH = 100
-HEALTH_LOSS_PER_UPDATE = 100 / 3600
+HEALTH_LOSS_PER_UPDATE = 500 / 3600
+FONT_SIZE = 25
 
 
 class Player(arcade.Sprite):
@@ -54,6 +55,24 @@ class Player(arcade.Sprite):
         self.check_bounds()
         self.center_x += self.change_x
         self.center_y += self.change_y
+
+    def display_health(self):
+        arcade.draw_text(
+            text="Health",
+            start_x=0,
+            start_y=SCREEN_HEIGHT,
+            color=arcade.color.BLACK,
+            font_size=FONT_SIZE,
+            font_name="arial",
+        )
+        arcade.draw_text(
+            text=str(round(self.current_health)),
+            start_x=0,
+            start_y=SCREEN_HEIGHT - (FONT_SIZE + 10),
+            color=arcade.color.BLACK,
+            font_size=FONT_SIZE,
+            font_name="arial",
+        )
 
     def loose_health(self, amount=HEALTH_LOSS_PER_UPDATE):
         """Lose some health.
