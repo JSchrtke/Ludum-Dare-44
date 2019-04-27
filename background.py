@@ -50,3 +50,7 @@ class Background(arcade.Sprite):
             Wether the texture should be changed next update or not
         """
         self.change_texture_flag = Boolean
+
+    def reset(self):
+        self.texture_increment_counter = 0
+        self.set_texture(0)

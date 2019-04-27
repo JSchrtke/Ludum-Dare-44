@@ -87,3 +87,7 @@ class Player(arcade.Sprite):
             self.bottom = 0
             # set the edge check true
             self.has_hit_edge = True
+
+    def reset(self):
+        self.center_x = SCREEN_WIDTH / 2
+        self.center_y = SCREEN_HEIGHT /2 

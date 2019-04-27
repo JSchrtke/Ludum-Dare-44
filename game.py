@@ -1,10 +1,12 @@
 import arcade
 import os
+import random
 from game_constants import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_NAME, PLAYER_MOVEMENT_SPEED
 from game_states import GameStates
 from background import Background
 from menu import MainMenu
 from player import Player
+from creature import TestCreature
 
 
 class Game(arcade.Window):
@@ -31,6 +33,8 @@ class Game(arcade.Window):
         self.menu = None
         # init variable holding the player
         self.player = None
+        # list for all creature sprites
+        self.all_creature_sprites_list = None
 
         # variable to check if state has changed
         self.state_change = None
@@ -41,6 +45,7 @@ class Game(arcade.Window):
 
     def setup(self):
         """Set up the game"""
+        self.all_creature_sprites_list = arcade.SpriteList()
         # set the default state
         self.state_change = False
         self.state = GameStates.MAIN_MENU
@@ -60,6 +65,12 @@ class Game(arcade.Window):
         self.player.center_x = SCREEN_WIDTH / 2
         self.player.center_y = SCREEN_HEIGHT / 2
 
+        # setup the creatures
+        for i in range(10):
+            creature = TestCreature()
+            creature.setup()
+            self.all_creature_sprites_list.append(creature)
+
     def on_draw(self):
         """execute this code whenever window gets drawn"""
         arcade.start_render()
@@ -71,25 +82,33 @@ class Game(arcade.Window):
 
         # when the game playing
         if self.state == GameStates.PLAYING:
+            self.all_creature_sprites_list.draw()
             self.player.draw()
 
     def on_update(self, delta_time):
         """Update the game"""
+        print(self.state) # TODO: DEBUG CODE, REMOVE!
         self.background.update()
         self.player.update()
-        # TODO: DEBUG CODE, REMOVE WHEN DONE
-        #######################################################################
-        # print(self.state)
+        self.all_creature_sprites_list.update()
         if self.state == GameStates.PLAYING:
             if self.player.has_hit_edge is True:
                 self.background.set_texture_change_flag(True)
-                print(self.player.has_hit_edge)
-        # END OF DEBUG CODE
-        #######################################################################
+                for creature in self.all_creature_sprites_list:
+                    creature.reset()
+
+
+
         if self.get_state_change() is True:
             self.set_state_change(False)
             self.set_old_state()
             self.update_state()
+
+            if self.state == GameStates.MAIN_MENU:
+                self.background.reset()
+                self.player.reset()
+                for creature in self.all_creature_sprites_list:
+                    creature.reset()
 
     def on_key_press(self, symbol, modifiers):
         if self.state == GameStates.MAIN_MENU:
