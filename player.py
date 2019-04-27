@@ -168,7 +168,7 @@ class Player(arcade.Sprite):
                 self.eat(target)
                 target.got_eaten()
 
-    def eat(self, target, health_bar):
+    def eat(self, target):
         self.current_health = self.current_health + target.value_when_eaten
         if self.current_health >= MAX_HEALTH:
             self.current_health = MAX_HEALTH
