@@ -56,6 +56,12 @@ class Player(arcade.Sprite):
         self.center_x += self.change_x
         self.center_y += self.change_y
 
+    def reset(self):
+        self.center_x = SCREEN_WIDTH / 2
+        self.center_y = SCREEN_HEIGHT / 2
+        self.current_health = self.max_health
+        self.dead = False
+
     def display_health(self):
         arcade.draw_text(
             text="Health",
@@ -177,7 +183,10 @@ class Player(arcade.Sprite):
             List of all the targets that can be attacked
 
         """
-        dist = (self.textures[BASE_ATTACK_RIGHT].width / 2 - self.textures[FACE_RIGHT].width / 2) * PLAYER_SCALE
+        dist = (
+            self.textures[BASE_ATTACK_RIGHT].width / 2
+            - self.textures[FACE_RIGHT].width / 2
+        ) * PLAYER_SCALE
         print(dist)
         self.translate_forward(dist)
         if self.angle == LEFT:
@@ -196,7 +205,10 @@ class Player(arcade.Sprite):
             self.current_health = MAX_HEALTH
 
     def reset_after_attack(self):
-        dist = (self.textures[BASE_ATTACK_RIGHT].width / 2 - self.textures[FACE_RIGHT].width / 2) * PLAYER_SCALE
+        dist = (
+            self.textures[BASE_ATTACK_RIGHT].width / 2
+            - self.textures[FACE_RIGHT].width / 2
+        ) * PLAYER_SCALE
         self.translate_forward(-dist)
         if self.angle == LEFT:
             self.set_texture(FACE_LEFT)
@@ -213,6 +225,3 @@ class Player(arcade.Sprite):
         if self.angle == DOWN:
             self.center_y = self.center_y - distance
 
-    def reset(self):
-        self.center_x = SCREEN_WIDTH / 2
-        self.center_y = SCREEN_HEIGHT / 2

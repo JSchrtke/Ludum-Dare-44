@@ -2,7 +2,7 @@ import arcade
 import random
 from game_constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
-CREATURE_SCALE = 0.5
+CREATURE_SCALE = 0.08
 DEFAULT_VALUE_WHEN_EATEN = 10
 TEST_CREATURE_VALUE_WHEN_EATEN = 10
 CREATURE_SPEED = 10
@@ -102,7 +102,16 @@ class Creature(arcade.Sprite):
             self.change_y = -CREATURE_SPEED * random.uniform(0, 1)
             self.change_x = CREATURE_SPEED * random.uniform(-0.5, 0.5)
 
-    def reset(self):
+    def pause_movement(self):
+        self.change_x = 0
+        self.change_y = 0
+        self.change_angle = 0
+
+    def unpause_movement(self):
+        self.change_x = CREATURE_SPEED * random.uniform(-0.5, 0.5)
+        self.change_y = CREATURE_SPEED * random.uniform(-0.5, 0.5)
+
+    def reset_to_random_position(self):
         self.center_x = SCREEN_WIDTH / random.uniform(1, 10)
         self.center_y = SCREEN_HEIGHT / random.uniform(1, 10)
 
@@ -117,18 +126,18 @@ class Creature(arcade.Sprite):
         self.change_y = 0
 
 
-class TestCreature(Creature):
+class Moth(Creature):
     def __init__(self, value_when_eaten=TEST_CREATURE_VALUE_WHEN_EATEN):
         super().__init__()
         self.value_when_eaten = value_when_eaten
         # load default texture
         texture = arcade.load_texture(
-            file_name="test_creature.png", scale=CREATURE_SCALE
+            file_name="moth.png", scale=CREATURE_SCALE
         )
         self.textures.append(texture)
         # load texture for when the creature is dead
         texture = arcade.load_texture(
-            file_name="test_creature_dead.png", scale=CREATURE_SCALE
+            file_name="moth_dead.png", scale=CREATURE_SCALE
         )
         self.textures.append(texture)
         # set default texture

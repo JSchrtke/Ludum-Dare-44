@@ -1,4 +1,6 @@
-# TODO: MAKE PAUSE SYSTEM
+# TODO: HANDLE GAME OVER STATE
+# TODO: SCALE MAX CREATURE COUNT WITH TIME, POTENTIALLY SPEED ASWELL
+# TODO: POTENTIALLY SCALE HEALTH LOSS WITH TIME ASWELL
 # TODO: make obstacles
 # TODO: MAKE POWERUP SYSTEM
 # TODO: make score system
@@ -13,13 +15,13 @@ from game_constants import (
     SCREEN_HEIGHT,
     SCREEN_NAME,
     PLAYER_MOVEMENT_SPEED,
-    MAX_CREATURE_COUNT
+    MAX_CREATURE_COUNT,
 )
 from game_states import GameStates
 from background import Background
 from menu import MainMenu
 from player import Player
-from creature import TestCreature
+from creature import Moth
 
 
 class Game(arcade.Window):
@@ -56,6 +58,9 @@ class Game(arcade.Window):
         # previous state
         self.old_state = None
 
+        # pause variable
+        self.is_game_paused = True
+
     def setup(self):
         """Set up the game"""
         # set the default state
@@ -80,11 +85,9 @@ class Game(arcade.Window):
         # setup the creatures
         self.all_creature_sprites_list = arcade.SpriteList()
         for i in range(MAX_CREATURE_COUNT):
-            creature = TestCreature()
+            creature = Moth()
             creature.setup()
             self.all_creature_sprites_list.append(creature)
-
-
 
     def on_draw(self):
         """execute this code whenever window gets drawn"""
@@ -103,29 +106,20 @@ class Game(arcade.Window):
 
     def on_update(self, delta_time):
         """Update the game"""
-        print("creature count: {0}".format(len(self.all_creature_sprites_list))) # TODO: DEBUG LINE, REMOVE
-        self.background.update()
-        self.player.update()
-        self.all_creature_sprites_list.update()
-
-        if self.state == GameStates.MAIN_MENU:
-            self.background.reset()
-            self.player.reset()
-            self.reset_all_creatures()
-            for creature in self.all_creature_sprites_list:
-                creature.reset()
-
-        
+        print(self.player.current_health)
+        if not self.is_game_paused:
+            self.background.update()
+            self.player.update()
+            self.all_creature_sprites_list.update()
 
         if self.state == GameStates.PLAYING:
-        # check if all creatures are gone, so new ones can be spawned
+            # check if all creatures are gone, so new ones can be spawned
             if len(self.all_creature_sprites_list) <= 0:
                 self.reset_all_creatures()
 
             # TODO: DEBUG CODE, REMOVE
-            #print("player health: {0}".format(self.player.current_health))
+            # print("player health: {0}".format(self.player.current_health))
             # END OF DEBUG CODE
-
 
             if self.player.check_if_dead():
                 self.set_state_change(True)
@@ -139,14 +133,23 @@ class Game(arcade.Window):
         if self.state == GameStates.GAME_OVER:
             print(self.state)
 
-
         if self.get_state_change() is True:
             self.set_state_change(False)
             self.set_old_state()
             self.update_state()
 
+            # check if game is back to playing, if so, unpause game
+            if self.state == GameStates.PLAYING:
+                self.unpause_game()
+            else:
+                self.pause_game()
 
-                
+            if self.state == GameStates.MAIN_MENU:
+                self.background.reset()
+                self.player.reset()
+                self.reset_all_creatures()
+                for creature in self.all_creature_sprites_list:
+                    creature.reset()
 
     def on_key_press(self, symbol, modifiers):
         if self.state == GameStates.MAIN_MENU:
@@ -263,12 +266,29 @@ class Game(arcade.Window):
         for creature in self.all_creature_sprites_list:
             creature.kill()
         for i in range(MAX_CREATURE_COUNT):
-            creature = TestCreature()
+            creature = Moth()
             creature.setup()
             self.all_creature_sprites_list.append(creature)
             if len(self.all_creature_sprites_list) >= MAX_CREATURE_COUNT:
                 break
 
+    def pause_game(self):
+        if not self.is_game_paused:
+            self.is_game_paused = True
+            for creature in self.all_creature_sprites_list:
+                creature.pause_movement()
+            print(
+                "is game paused: {0}".format(self.is_game_paused)
+            )  # TODO: DEBUG LINE, REMOVE
+
+    def unpause_game(self):
+        if self.is_game_paused:
+            self.is_game_paused = False
+            for creature in self.all_creature_sprites_list:
+                creature.unpause_movement()
+            print(
+                "is game paused: {0}".format(self.is_game_paused)
+            )  # TODO: DEBUG LINE, REMOVE
 
 
 def main():
