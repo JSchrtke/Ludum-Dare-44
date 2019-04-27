@@ -1,5 +1,6 @@
 import arcade
 from game_constants import SCREEN_WIDTH, SCREEN_HEIGHT
+
 PLAYER_SCALE = 0.1
 FACE_RIGHT = 0
 FACE_LEFT = 1
@@ -9,6 +10,8 @@ RIGHT = 0
 LEFT = 180
 UP = 90
 DOWN = 270
+MAX_HEALTH = 100
+HEALTH_LOSS_PER_UPDATE = 100 / 3600
 
 
 class Player(arcade.Sprite):
@@ -17,13 +20,21 @@ class Player(arcade.Sprite):
     def __init__(self):
         super().__init__()
         # load the player texture
-        texture = arcade.load_texture(file_name="pepe_facing_right.png", scale=PLAYER_SCALE)
+        texture = arcade.load_texture(
+            file_name="pepe_facing_right.png", scale=PLAYER_SCALE
+        )
         self.textures.append(texture)
-        texture = arcade.load_texture(file_name="pepe_facing_left.png", scale=PLAYER_SCALE)
+        texture = arcade.load_texture(
+            file_name="pepe_facing_left.png", scale=PLAYER_SCALE
+        )
         self.textures.append(texture)
-        texture = arcade.load_texture(file_name="pepe_facing_right_punching.png", scale=PLAYER_SCALE)
+        texture = arcade.load_texture(
+            file_name="pepe_facing_right_punching.png", scale=PLAYER_SCALE
+        )
         self.textures.append(texture)
-        texture = arcade.load_texture(file_name="pepe_facing_left_punching.png", scale=PLAYER_SCALE)
+        texture = arcade.load_texture(
+            file_name="pepe_facing_left_punching.png", scale=PLAYER_SCALE
+        )
         self.textures.append(texture)
 
         # set the default texture
@@ -31,13 +42,38 @@ class Player(arcade.Sprite):
         # variable to check if player has hit edge of screen
         self.has_hit_edge = False
 
+        # health variables
+        self.max_health = MAX_HEALTH
+        self.current_health = MAX_HEALTH
+        self.dead = False
+
     def update(self):
         """Update the player"""
+        self.loose_health()
         self.has_hit_edge = False
         self.check_bounds()
         self.center_x += self.change_x
         self.center_y += self.change_y
-        print(self.angle)  # TODO: DEBUG LINE, REMOVE
+
+    def loose_health(self, amount=HEALTH_LOSS_PER_UPDATE):
+        """Lose some health.
+        
+        Parameters
+        ----------
+        amount : float
+            Health loss per update
+        """
+        self.current_health = self.current_health - HEALTH_LOSS_PER_UPDATE
+
+    def check_if_dead(self):
+        """Check if the player is dead"""
+        if self.current_health <= 0:
+            self.dead = True
+            return self.dead
+
+    def set_player_dead(self):
+        if self.current_health <= 0:
+            self.dead = True
 
     def move_right(self, speed):
         """Move the player to the right.
@@ -74,7 +110,6 @@ class Player(arcade.Sprite):
         self.change_y = speed
         self.angle = UP
         self.set_texture(FACE_RIGHT)
-
 
     def move_down(self, speed):
         """Move the player to the right.
@@ -129,6 +164,14 @@ class Player(arcade.Sprite):
             self.set_texture(BASE_ATTACK_RIGHT)
         for target in arcade.check_for_collision_with_list(self, target_list):
             target.got_hit()
+            if target.can_be_eaten:
+                self.eat(target)
+                target.got_eaten()
+
+    def eat(self, target, health_bar):
+        self.current_health = self.current_health + target.value_when_eaten
+        if self.current_health >= MAX_HEALTH:
+            self.current_health = MAX_HEALTH
 
     def reset_texture(self):
         if self.angle == LEFT:
@@ -138,4 +181,4 @@ class Player(arcade.Sprite):
 
     def reset(self):
         self.center_x = SCREEN_WIDTH / 2
-        self.center_y = SCREEN_HEIGHT /2 
+        self.center_y = SCREEN_HEIGHT / 2

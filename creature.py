@@ -3,9 +3,10 @@ import random
 from game_constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 CREATURE_SCALE = 0.5
-DEFAULT_VALUE_WHEN_EATEN = 1
+DEFAULT_VALUE_WHEN_EATEN = 10
 CREATURE_SPEED = 10
 ALIVE = 0
+DEAD = 1
 
 
 class Creature(arcade.Sprite):
@@ -14,8 +15,17 @@ class Creature(arcade.Sprite):
         self.value_when_eaten = DEFAULT_VALUE_WHEN_EATEN
         self.moving = random.randint(0, 1)
         self.dead = False
+        self.can_be_eaten = False
+        self.can_be_eaten_increment_counter = 0
 
     def update(self):
+        if self.dead:
+            self.set_texture(DEAD)
+            self.stop()
+            self.can_be_eaten_increment_counter += 1
+        if self.can_be_eaten_increment_counter == 6:
+            self.can_be_eaten = True
+            self.can_be_eaten_increment_counter = 0
         self.check_bounds()
         self.center_x += self.change_x
         self.center_y += self.change_y
@@ -97,16 +107,29 @@ class Creature(arcade.Sprite):
 
     def got_hit(self):
         self.dead = True
+
+    def got_eaten(self):
         self.kill()
+
+    def stop(self):
+        self.change_x = 0
+        self.change_y = 0
 
 
 class TestCreature(Creature):
     def __init__(self):
         super().__init__()
+        # load default texture
         texture = arcade.load_texture(
             file_name="test_creature.png", scale=CREATURE_SCALE
         )
         self.textures.append(texture)
+        # load texture for when the creature is dead
+        texture = arcade.load_texture(
+            file_name="test_creature_dead.png", scale=CREATURE_SCALE
+        )
+        self.textures.append(texture)
+        # set default texture
         self.set_texture(ALIVE)
         self.value_when_eaten = DEFAULT_VALUE_WHEN_EATEN * 2
 

@@ -1,12 +1,27 @@
+# TODO: make health system
+# TODO: make obstacles
+# TODO: make score system
+# TODO: add graphics/assets
+# TODO: MAKE POWERUP SYSTEM
+# TODO: MAKE PAUSE SYSTEM
+# TODO: FIX CREATURES NOT RESPAWNING ON ENVIRONMENT CHANGE
+# TODO FIX PLAYER MOVING WHEN ATTACKING
+# TODO: MAKE IT SO YOU HAVE TO DOUBLE TAP CREATURES, ONCE TO KILL, SECOND TO EAT. ALSO MAKE IT SO YOU CAN ONLY EAT DEAD CREATURES
 import arcade
 import os
 import random
-from game_constants import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_NAME, PLAYER_MOVEMENT_SPEED
+from game_constants import (
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    SCREEN_NAME,
+    PLAYER_MOVEMENT_SPEED,
+)
 from game_states import GameStates
 from background import Background
 from menu import MainMenu
 from player import Player
 from creature import TestCreature
+from healthbar import HealthBar
 
 
 class Game(arcade.Window):
@@ -35,6 +50,8 @@ class Game(arcade.Window):
         self.player = None
         # list for all creature sprites
         self.all_creature_sprites_list = None
+        # # init variable for the health bar
+        # self.health_bar = None
 
         # variable to check if state has changed
         self.state_change = None
@@ -71,6 +88,9 @@ class Game(arcade.Window):
             creature.setup()
             self.all_creature_sprites_list.append(creature)
 
+        # setup the health bar
+        self.health_bar = HealthBar()
+
     def on_draw(self):
         """execute this code whenever window gets drawn"""
         arcade.start_render()
@@ -82,33 +102,46 @@ class Game(arcade.Window):
 
         # when the game playing
         if self.state == GameStates.PLAYING:
+            self.health_bar.draw()
             self.all_creature_sprites_list.draw()
             self.player.draw()
 
     def on_update(self, delta_time):
         """Update the game"""
-        #print(self.state) # TODO: DEBUG CODE, REMOVE!
         self.background.update()
         self.player.update()
         self.all_creature_sprites_list.update()
+
+        if self.state == GameStates.MAIN_MENU:
+            self.background.reset()
+            self.player.reset()
+            for creature in self.all_creature_sprites_list:
+                creature.reset()
+
         if self.state == GameStates.PLAYING:
+            # TODO: DEBUG CODE, REMOVE
+            # print("player health: {0}".format(self.player.current_health))
+            # END OF DEBUG CODE
+            self.health_bar.update(self.player)
+
+            if self.player.check_if_dead():
+                self.set_state_change(True)
+                self.set_new_state(GameStates.GAME_OVER)
+                print(self.state)
+
             if self.player.has_hit_edge is True:
                 self.background.set_texture_change_flag(True)
                 for creature in self.all_creature_sprites_list:
                     creature.reset()
 
+        if self.state == GameStates.GAME_OVER:
+            print(self.state)
 
 
         if self.get_state_change() is True:
             self.set_state_change(False)
             self.set_old_state()
             self.update_state()
-
-            if self.state == GameStates.MAIN_MENU:
-                self.background.reset()
-                self.player.reset()
-                for creature in self.all_creature_sprites_list:
-                    creature.reset()
 
     def on_key_press(self, symbol, modifiers):
         if self.state == GameStates.MAIN_MENU:
@@ -119,7 +152,7 @@ class Game(arcade.Window):
                 self.set_state_change(True)
                 self.set_new_state(GameStates.SCORES)
             if symbol == arcade.key.ESCAPE:
-                # TODO: make proper quite logic
+                # TODO: make proper quit logic
                 arcade.close_window()
 
         if self.state == GameStates.PLAYING:
