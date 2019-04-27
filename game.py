@@ -1,12 +1,10 @@
-# TODO: make health system
 # TODO: make obstacles
 # TODO: make score system
 # TODO: MAKE POWERUP SYSTEM
 # TODO: MAKE PAUSE SYSTEM
 # TODO: FIX CREATURES NOT RESPAWNING ON ENVIRONMENT CHANGE
-# TODO FIX PLAYER MOVING WHEN ATTACKING
 # TODO: add graphics/assets
-# TODO: IF TIME PERMITTING, MAKE HEALTBAR SYSTEM BETTER BY INTERGRATING INTO PLAYER CLASS
+# TODO: IF TIME PERMITTING, MAKE actual healthbar
 import arcade
 import os
 import random
@@ -21,7 +19,6 @@ from background import Background
 from menu import MainMenu
 from player import Player
 from creature import TestCreature
-from healthbar import HealthBar
 
 
 class Game(arcade.Window):
@@ -197,7 +194,7 @@ class Game(arcade.Window):
             if symbol == arcade.key.LEFT:
                 self.player.move_left(0)
             if symbol == arcade.key.SPACE:
-                self.player.reset_texture()
+                self.player.reset_after_attack()
 
     def set_state_change(self, boolean):
         """Set wether or not the state has changed.

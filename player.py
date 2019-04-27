@@ -11,7 +11,7 @@ LEFT = 180
 UP = 90
 DOWN = 270
 MAX_HEALTH = 100
-HEALTH_LOSS_PER_UPDATE = 500 / 3600
+HEALTH_LOSS_PER_UPDATE = 100 / 3600
 FONT_SIZE = 25
 
 
@@ -50,7 +50,7 @@ class Player(arcade.Sprite):
 
     def update(self):
         """Update the player"""
-        self.loose_health()
+        self.lose_health()
         self.has_hit_edge = False
         self.check_bounds()
         self.center_x += self.change_x
@@ -74,7 +74,7 @@ class Player(arcade.Sprite):
             font_name="arial",
         )
 
-    def loose_health(self, amount=HEALTH_LOSS_PER_UPDATE):
+    def lose_health(self, amount=HEALTH_LOSS_PER_UPDATE):
         """Lose some health.
         
         Parameters
@@ -177,6 +177,9 @@ class Player(arcade.Sprite):
             List of all the targets that can be attacked
 
         """
+        dist = (self.textures[BASE_ATTACK_RIGHT].width / 2 - self.textures[FACE_RIGHT].width / 2) * PLAYER_SCALE
+        print(dist)
+        self.translate_forward(dist)
         if self.angle == LEFT:
             self.set_texture(BASE_ATTACK_LEFT)
         else:
@@ -192,11 +195,23 @@ class Player(arcade.Sprite):
         if self.current_health >= MAX_HEALTH:
             self.current_health = MAX_HEALTH
 
-    def reset_texture(self):
+    def reset_after_attack(self):
+        dist = (self.textures[BASE_ATTACK_RIGHT].width / 2 - self.textures[FACE_RIGHT].width / 2) * PLAYER_SCALE
+        self.translate_forward(-dist)
         if self.angle == LEFT:
             self.set_texture(FACE_LEFT)
         else:
             self.set_texture(FACE_RIGHT)
+
+    def translate_forward(self, distance):
+        if self.angle == RIGHT:
+            self.center_x = self.center_x + distance
+        if self.angle == LEFT:
+            self.center_x = self.center_x - distance
+        if self.angle == UP:
+            self.center_y = self.center_y + distance
+        if self.angle == DOWN:
+            self.center_y = self.center_y - distance
 
     def reset(self):
         self.center_x = SCREEN_WIDTH / 2
