@@ -8,11 +8,15 @@ class Background(arcade.Sprite):
     def __init__(self):
         super().__init__()
         # load all the textures for different backgrounds
-        texture = arcade.load_texture(file_name="red.png")
+        texture = arcade.load_texture(file_name="grass_1.png")
         self.textures.append(texture)
-        texture = arcade.load_texture(file_name="green.png")
+        texture = arcade.load_texture(file_name="grass_2.png")
         self.textures.append(texture)
-        texture = arcade.load_texture(file_name="yellow.png")
+        texture = arcade.load_texture(file_name="grass_3.png")
+        self.textures.append(texture)
+        texture = arcade.load_texture(file_name="grass_4.png")
+        self.textures.append(texture)
+        texture = arcade.load_texture(file_name="grass_5.png")
         self.textures.append(texture)
         # set the default texture
         self.set_texture(0)

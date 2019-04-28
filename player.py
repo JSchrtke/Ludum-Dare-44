@@ -105,7 +105,7 @@ class Player(arcade.Sprite):
         if self.freeze_bullet is not None:
             self.freeze_bullet.update()
         self.lose_health()
-        self.has_hit_edge = False
+        # self.has_hit_edge = False
         self.center_x += self.change_x
         self.center_y += self.change_y
         self.angle += self.change_angle
@@ -264,8 +264,9 @@ class Player(arcade.Sprite):
         # TODO: ADD CODE
         self.set_texture(SPIN_ATTACK_TEXTURE)
         self.change_angle = 15
+        self.is_spinning = True
         
-        for target in arcade.check_for_collision_with_list(self, target_list):
+        for target in target_list:
             target.got_hit()
             if target.can_be_eaten:
                 self.eat(target)
@@ -335,7 +336,7 @@ class Player(arcade.Sprite):
     def reset_after_attack(self):
         self.is_attacking = False
         if self.current_attack_type == SPIN_ATTACK:
-            self.is_spinning = False
+            #self.is_spinning = False
             self.angle = 0
             self.change_angle = 0
 
@@ -406,3 +407,6 @@ class Player(arcade.Sprite):
         if self.angle == DOWN:
             self.center_y = self.center_y - distance
 
+    def stop(self):
+        self.change_x = 0
+        self.change_y = 0

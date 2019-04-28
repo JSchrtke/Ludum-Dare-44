@@ -3,6 +3,8 @@ import random
 from game_constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 CREATURE_SCALE = 0.08
+MOTH_SCALE = 0.08
+BUG_SCALE = 0.08
 DEFAULT_HEALTH_VALUE_WHEN_EATEN = 10
 DEFAULT_SCORE_VALUE_WHEN_EATEN = 1
 CREATURE_SPEED = 10
@@ -16,10 +18,10 @@ class Creature(arcade.Sprite):
         super().__init__()
         self.value_when_eaten = DEFAULT_HEALTH_VALUE_WHEN_EATEN
         self.score_when_eaten = DEFAULT_SCORE_VALUE_WHEN_EATEN
-        self.moving = random.randint(0, 1)
         self.dead = False
         self.can_be_eaten = False
         self.can_be_eaten_increment_counter = 0
+        self.frozen = False
 
     def update(self):
         if self.dead:
@@ -34,9 +36,11 @@ class Creature(arcade.Sprite):
         self.center_y += self.change_y
 
     def setup(self):
-        if self.moving == 1:
-            self.change_x = CREATURE_SPEED * random.uniform(-0.5, 0.5)
-            self.change_y = CREATURE_SPEED * random.uniform(-0.5, 0.5)
+        self.center_x = SCREEN_WIDTH * random.uniform(0, 1)
+        self.center_y = SCREEN_HEIGHT * random.uniform(0, 1)
+        self.change_x = CREATURE_SPEED * random.uniform(-0.5, 0.5)
+        self.change_y = CREATURE_SPEED * random.uniform(-0.5, 0.5)
+
 
     def move_right(self, speed):
         """Move the creature to the right.
@@ -109,6 +113,10 @@ class Creature(arcade.Sprite):
         self.change_y = 0
         self.change_angle = 0
 
+    def reverse_movement(self):
+        self.change_x = -self.change_x
+        self.change_y = -self.change_y
+
     def unpause_movement(self):
         self.change_x = CREATURE_SPEED * random.uniform(-0.5, 0.5)
         self.change_y = CREATURE_SPEED * random.uniform(-0.5, 0.5)
@@ -130,6 +138,7 @@ class Creature(arcade.Sprite):
     def freeze(self):
         self.set_texture(FROZEN)
         self.stop()
+        self.frozen = True
 
 
 class Moth(Creature):
@@ -151,9 +160,28 @@ class Moth(Creature):
         self.textures.append(texture)
         # set default texture
         self.set_texture(ALIVE)
-        self.value_when_eaten = DEFAULT_HEALTH_VALUE_WHEN_EATEN * 2
 
-        self.center_x = SCREEN_WIDTH / random.uniform(1, 10)
-        self.center_y = SCREEN_HEIGHT / random.uniform(1, 10)
+class Bug(Creature):
+    def __init__(self):
+        super().__init__()
+        # load default texture
+        texture = arcade.load_texture(
+            file_name="bug.png", scale=CREATURE_SCALE
+        )
+        self.textures.append(texture)
+        # load texture for when the creature is dead
+        texture = arcade.load_texture(
+            file_name="bug_dead.png", scale=CREATURE_SCALE
+        )
+        self.textures.append(texture)
+        texture = arcade.load_texture(
+            file_name="bug_frozen.png", scale=CREATURE_SCALE
+        )
+        self.textures.append(texture)
+        # set default texture
+        self.set_texture(ALIVE)
+
+
+
 
         
