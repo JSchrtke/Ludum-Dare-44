@@ -14,3 +14,33 @@ class MainMenu(arcade.Sprite):
         """Update the menu."""
         # if this needs updating, put the code here
         pass
+
+class PauseMenu(arcade.Sprite):
+    """The pause menu"""
+
+    def __init__(self):
+        super().__init__()
+        texture = arcade.load_texture(file_name="pause_menu.png")
+        self.textures.append(texture)
+        self.set_texture(0)
+
+    def update(self):
+        pass
+
+class GameOverMenu(arcade.Sprite):
+    """The game over screen/menu"""
+
+    def __init__(self):
+        super().__init__()
+        texture = arcade.load_texture(file_name="game_over.png")
+        self.textures.append(texture)
+        self.set_texture(0)
+
+class ScoreBoard(arcade.Sprite):
+    """The game over screen/menu"""
+
+    def __init__(self):
+        super().__init__()
+        texture = arcade.load_texture(file_name="score_board.png")
+        self.textures.append(texture)
+        self.set_texture(0)

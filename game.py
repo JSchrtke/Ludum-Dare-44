@@ -1,11 +1,12 @@
-# TODO: HANDLE GAME OVER STATE
+# TODO: make score system
 # TODO: SCALE MAX CREATURE COUNT WITH TIME, POTENTIALLY SPEED ASWELL
 # TODO: POTENTIALLY SCALE HEALTH LOSS WITH TIME ASWELL
-# TODO: make obstacles
 # TODO: MAKE POWERUP SYSTEM
-# TODO: make score system
+# TODO: make obstacles
+# TODO: make proper quit logic
 # TODO: add graphics/assets
 # TODO: make and add sound
+# TODO: MAKE CREATURES STARTLE WHEN OTHERS GET KILLED, INCREASE THEIR SPEED
 # TODO: IF TIME PERMITTING, MAKE actual healthbar
 import arcade
 import os
@@ -19,7 +20,7 @@ from game_constants import (
 )
 from game_states import GameStates
 from background import Background
-from menu import MainMenu
+from menu import MainMenu, PauseMenu, GameOverMenu, ScoreBoard
 from player import Player
 from creature import Moth
 
@@ -45,7 +46,10 @@ class Game(arcade.Window):
         # init variable holding the background
         self.background = None
         # init variable holding the menu
-        self.menu = None
+        self.main_menu = None
+        self.pause_menu = None
+        self.game_over_screen = None
+        self.score_board = None
         # init variable holding the player
         self.player = None
         # list for all creature sprites
@@ -73,9 +77,24 @@ class Game(arcade.Window):
         self.background.center_y = SCREEN_HEIGHT / 2
 
         # setup the main menu
-        self.menu = MainMenu()
-        self.menu.center_x = SCREEN_WIDTH / 2
-        self.menu.center_y = SCREEN_HEIGHT / 2
+        self.main_menu = MainMenu()
+        self.main_menu.center_x = SCREEN_WIDTH / 2
+        self.main_menu.center_y = SCREEN_HEIGHT / 2
+
+        # setup the pause menu
+        self.pause_menu = PauseMenu()
+        self.pause_menu.center_x = SCREEN_WIDTH / 2
+        self.pause_menu.center_y = SCREEN_HEIGHT /2
+
+        # setup the game over screen
+        self.game_over_screen = GameOverMenu()
+        self.game_over_screen.center_x = SCREEN_WIDTH / 2
+        self.game_over_screen.center_y = SCREEN_HEIGHT /2
+
+        # setup the scoreboard
+        self.score_board = ScoreBoard()
+        self.score_board.center_x = SCREEN_WIDTH / 2
+        self.score_board.center_y = SCREEN_HEIGHT /2
 
         # setup the player
         self.player = Player()
@@ -94,9 +113,19 @@ class Game(arcade.Window):
         arcade.start_render()
         self.background.draw()
 
-        # when the game is in menu
+        # when the game is in main_menu
         if self.state == GameStates.MAIN_MENU:
-            self.menu.draw()
+            self.main_menu.draw()
+
+        # when the game is in the pause menu
+        if self.state == GameStates.PAUSE_MENU:
+            self.pause_menu.draw()
+
+        if self.state == GameStates.GAME_OVER:
+            self.game_over_screen.draw()
+
+        if self.state == GameStates.SCORES:
+            self.score_board.draw()
 
         # when the game playing
         if self.state == GameStates.PLAYING:
@@ -106,7 +135,6 @@ class Game(arcade.Window):
 
     def on_update(self, delta_time):
         """Update the game"""
-        print(self.player.current_health)
         if not self.is_game_paused:
             self.background.update()
             self.player.update()
@@ -117,21 +145,14 @@ class Game(arcade.Window):
             if len(self.all_creature_sprites_list) <= 0:
                 self.reset_all_creatures()
 
-            # TODO: DEBUG CODE, REMOVE
-            # print("player health: {0}".format(self.player.current_health))
-            # END OF DEBUG CODE
-
             if self.player.check_if_dead():
                 self.set_state_change(True)
                 self.set_new_state(GameStates.GAME_OVER)
-                print(self.state)
 
             if self.player.has_hit_edge is True:
                 self.background.set_texture_change_flag(True)
                 self.reset_all_creatures()
 
-        if self.state == GameStates.GAME_OVER:
-            print(self.state)
 
         if self.get_state_change() is True:
             self.set_state_change(False)
@@ -149,7 +170,12 @@ class Game(arcade.Window):
                 self.player.reset()
                 self.reset_all_creatures()
                 for creature in self.all_creature_sprites_list:
-                    creature.reset()
+                    creature.reset_to_random_position()
+             
+            if self.state == GameStates.GAME_OVER:
+                # TODO: put function to display current score here, once score system in place
+                print("handled game over state")  # TODO: DEBUG LINE, REMOVE
+                pass
 
     def on_key_press(self, symbol, modifiers):
         if self.state == GameStates.MAIN_MENU:
@@ -160,14 +186,12 @@ class Game(arcade.Window):
                 self.set_state_change(True)
                 self.set_new_state(GameStates.SCORES)
             if symbol == arcade.key.ESCAPE:
-                # TODO: make proper quit logic
                 arcade.close_window()
 
         if self.state == GameStates.PLAYING:
             if symbol == arcade.key.ESCAPE:
                 self.set_state_change(True)
-                self.set_new_state(GameStates.INGAME_MENU)
-                # TODO: make pause logic to pause game when in menu
+                self.set_new_state(GameStates.PAUSE_MENU)
             if symbol == arcade.key.UP:
                 self.player.move_up(PLAYER_MOVEMENT_SPEED)
             if symbol == arcade.key.DOWN:
@@ -179,7 +203,7 @@ class Game(arcade.Window):
             if symbol == arcade.key.SPACE:
                 self.player.base_attack(self.all_creature_sprites_list)
 
-        if self.state == GameStates.INGAME_MENU:
+        if self.state == GameStates.PAUSE_MENU:
             if symbol == arcade.key.ESCAPE:
                 self.set_state_change(True)
                 self.set_new_state(GameStates.MAIN_MENU)
@@ -189,6 +213,11 @@ class Game(arcade.Window):
             if symbol == arcade.key.TAB:
                 self.set_state_change(True)
                 self.set_new_state(GameStates.SCORES)
+
+        if self.state == GameStates.GAME_OVER:
+            if symbol == arcade.key.ESCAPE:
+                self.set_state_change(True)
+                self.set_new_state(GameStates.MAIN_MENU)
 
         if self.state == GameStates.SCORES:
             if symbol == arcade.key.ESCAPE:
