@@ -8,6 +8,7 @@ DEFAULT_SCORE_VALUE_WHEN_EATEN = 1
 CREATURE_SPEED = 10
 ALIVE = 0
 DEAD = 1
+FROZEN = 2
 
 # TODO: FIGURE OUT HOW TO TO THE CLASS INHERITANC STUFF PROPERLY, CONCERNING VALUES WHEN EATEN AND OTHER POTENTIAL PROPERTIES
 class Creature(arcade.Sprite):
@@ -126,6 +127,10 @@ class Creature(arcade.Sprite):
         self.change_x = 0
         self.change_y = 0
 
+    def freeze(self):
+        self.set_texture(FROZEN)
+        self.stop()
+
 
 class Moth(Creature):
     def __init__(self):
@@ -140,9 +145,15 @@ class Moth(Creature):
             file_name="moth_dead.png", scale=CREATURE_SCALE
         )
         self.textures.append(texture)
+        texture = arcade.load_texture(
+            file_name="moth_frozen.png", scale=CREATURE_SCALE
+        )
+        self.textures.append(texture)
         # set default texture
         self.set_texture(ALIVE)
         self.value_when_eaten = DEFAULT_HEALTH_VALUE_WHEN_EATEN * 2
 
         self.center_x = SCREEN_WIDTH / random.uniform(1, 10)
         self.center_y = SCREEN_HEIGHT / random.uniform(1, 10)
+
+        

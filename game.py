@@ -1,9 +1,8 @@
+# TODO: make obstacles
+# TODO: fix creatures respawning in the same rough area
 # TODO: SCALE MAX CREATURE COUNT WITH TIME, POTENTIALLY SPEED ASWELL
 # TODO: POTENTIALLY SCALE HEALTH LOSS WITH TIME ASWELL
-# TODO: MAKE POWERUP SYSTEM
-# TODO: make obstacles
-# use built in function to check for distance between sprites, so that the obstacles always have a gap large enough for the player in base state
-# TODO: make proper quit logic
+#   use built in function to check for distance between sprites, so that the obstacles always have a gap large enough for the player in base state
 # TODO: add graphics/assets
 # TODO: make and add sound
 # TODO: MAKE CREATURES STARTLE WHEN OTHERS GET KILLED, INCREASE THEIR SPEED
@@ -22,7 +21,15 @@ from game_constants import (
 from game_states import GameStates
 from background import Background
 from menu import MainMenu, PauseMenu, GameOverMenu, ScoreBoard
-from player import Player
+from player import (
+    Player,
+    SPIN_ATTACK,
+    SPIN_ATTACK_COST,
+    FREEZE_ATTACK,
+    FREEZE_ATTACK_COST,
+    TELEPORT,
+    TELEPORT_COST,
+)
 from creature import Moth
 
 
@@ -154,6 +161,8 @@ class Game(arcade.Window):
         arcade.start_render()
         self.background.draw()
 
+        
+
         # when the game is in main_menu
         if self.state == GameStates.MAIN_MENU:
             self.main_menu.draw()
@@ -166,10 +175,18 @@ class Game(arcade.Window):
                 font_size=50,
                 bold=True,
             )
+            self.player.display_health()
             self.pause_menu.draw()
 
         if self.state == GameStates.GAME_OVER:
             self.game_over_screen.draw()
+            self.player.display_score(
+                start_x=SCREEN_WIDTH / 2 - 100,
+                start_y=SCREEN_HEIGHT / 2,
+                font_size=50,
+                bold=True,
+            )
+
 
         if self.state == GameStates.SCORES:
             self.score_board.draw()
@@ -182,6 +199,8 @@ class Game(arcade.Window):
             self.player.display_score(start_x=0, start_y=SCREEN_HEIGHT - 60)
             self.all_creature_sprites_list.draw()
             self.player.draw()
+            if self.player.freeze_bullet is not None:
+                self.player.freeze_bullet.draw()
 
     def on_update(self, delta_time):
         """Update the game"""
@@ -200,8 +219,9 @@ class Game(arcade.Window):
                 self.set_new_state(GameStates.GAME_OVER)
 
             if self.player.has_hit_edge is True:
-                self.background.set_texture_change_flag(True)
-                self.reset_all_creatures()
+                if self.player.is_attacking is False:
+                    self.background.set_texture_change_flag(True)
+                    self.reset_all_creatures()
 
         if self.get_state_change() is True:
             self.set_state_change(False)
@@ -253,7 +273,15 @@ class Game(arcade.Window):
             if symbol == arcade.key.LEFT:
                 self.player.move_left(PLAYER_MOVEMENT_SPEED)
             if symbol == arcade.key.SPACE:
-                self.player.base_attack(self.all_creature_sprites_list)
+                self.player.attack(self.all_creature_sprites_list)
+            if symbol == arcade.key.A:
+                self.player.select_attack_type(0)
+            if symbol == arcade.key.S:
+                self.player.select_attack_type(1)
+            if symbol == arcade.key.D:
+                self.player.select_attack_type(2)
+            if symbol == arcade.key.F:
+                self.player.select_attack_type(3)
 
         if self.state == GameStates.PAUSE_MENU:
             if symbol == arcade.key.ESCAPE:
@@ -262,6 +290,25 @@ class Game(arcade.Window):
             if symbol == arcade.key.ENTER:
                 self.set_state_change(True)
                 self.set_new_state(GameStates.PLAYING)
+            if symbol == arcade.key.S:
+                self.player.buy_attack(SPIN_ATTACK_COST, SPIN_ATTACK)
+                print(
+                    "spin attack count: {0}".format(
+                        self.player.spin_attack_amount
+                    )
+                )  # TODO: DEBUG LINE, REMOVE
+            if symbol == arcade.key.D:
+                self.player.buy_attack(FREEZE_ATTACK_COST, FREEZE_ATTACK)
+                print(
+                    "freeze attack count: {0}".format(
+                        self.player.freeze_attack_amount
+                    )
+                )  # TODO: DEBUG LINE, REMOVE
+            if symbol == arcade.key.F:
+                self.player.buy_attack(TELEPORT_COST, TELEPORT)
+                print(
+                    "teleport count: {0}".format(self.player.teleport_amount)
+                )  # TODO: DEBUG LINE, REMOVE
 
         if self.state == GameStates.GAME_OVER:
             if symbol == arcade.key.ESCAPE:
@@ -355,7 +402,6 @@ class Game(arcade.Window):
             self.is_game_paused = True
             for creature in self.all_creature_sprites_list:
                 creature.pause_movement()
-
 
     def unpause_game(self):
         if self.is_game_paused:
