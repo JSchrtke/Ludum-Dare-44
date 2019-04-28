@@ -3,17 +3,18 @@ import random
 from game_constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 CREATURE_SCALE = 0.08
-DEFAULT_VALUE_WHEN_EATEN = 10
-TEST_CREATURE_VALUE_WHEN_EATEN = 10
+DEFAULT_HEALTH_VALUE_WHEN_EATEN = 10
+DEFAULT_SCORE_VALUE_WHEN_EATEN = 1
 CREATURE_SPEED = 10
 ALIVE = 0
 DEAD = 1
 
 # TODO: FIGURE OUT HOW TO TO THE CLASS INHERITANC STUFF PROPERLY, CONCERNING VALUES WHEN EATEN AND OTHER POTENTIAL PROPERTIES
 class Creature(arcade.Sprite):
-    def __init__(self, value_when_eaten=DEFAULT_VALUE_WHEN_EATEN):
+    def __init__(self):
         super().__init__()
-        self.value_when_eaten = value_when_eaten
+        self.value_when_eaten = DEFAULT_HEALTH_VALUE_WHEN_EATEN
+        self.score_when_eaten = DEFAULT_SCORE_VALUE_WHEN_EATEN
         self.moving = random.randint(0, 1)
         self.dead = False
         self.can_be_eaten = False
@@ -127,9 +128,8 @@ class Creature(arcade.Sprite):
 
 
 class Moth(Creature):
-    def __init__(self, value_when_eaten=TEST_CREATURE_VALUE_WHEN_EATEN):
+    def __init__(self):
         super().__init__()
-        self.value_when_eaten = value_when_eaten
         # load default texture
         texture = arcade.load_texture(
             file_name="moth.png", scale=CREATURE_SCALE
@@ -142,7 +142,7 @@ class Moth(Creature):
         self.textures.append(texture)
         # set default texture
         self.set_texture(ALIVE)
-        self.value_when_eaten = DEFAULT_VALUE_WHEN_EATEN * 2
+        self.value_when_eaten = DEFAULT_HEALTH_VALUE_WHEN_EATEN * 2
 
         self.center_x = SCREEN_WIDTH / random.uniform(1, 10)
         self.center_y = SCREEN_HEIGHT / random.uniform(1, 10)

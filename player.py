@@ -1,4 +1,5 @@
 import arcade
+import csv
 from game_constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 PLAYER_SCALE = 0.1
@@ -10,7 +11,7 @@ RIGHT = 0
 LEFT = 180
 UP = 90
 DOWN = 270
-MAX_HEALTH = 10
+MAX_HEALTH = 100
 HEALTH_LOSS_PER_UPDATE = 100 / 3600
 FONT_SIZE = 25
 
@@ -48,6 +49,12 @@ class Player(arcade.Sprite):
         self.current_health = MAX_HEALTH
         self.dead = False
 
+        # list to save all the scores of the current game session, export to file later
+        self.current_session_scores_list = []
+
+        # score variables
+        self.current_score = 0
+
     def update(self):
         """Update the player"""
         self.lose_health()
@@ -60,25 +67,10 @@ class Player(arcade.Sprite):
         self.center_x = SCREEN_WIDTH / 2
         self.center_y = SCREEN_HEIGHT / 2
         self.current_health = self.max_health
+        self.current_session_scores_list.append(self.current_score)
+        self.current_score = 0
         self.dead = False
 
-    def display_health(self):
-        arcade.draw_text(
-            text="Health",
-            start_x=0,
-            start_y=SCREEN_HEIGHT,
-            color=arcade.color.BLACK,
-            font_size=FONT_SIZE,
-            font_name="arial",
-        )
-        arcade.draw_text(
-            text=str(round(self.current_health)),
-            start_x=0,
-            start_y=SCREEN_HEIGHT - (FONT_SIZE + 10),
-            color=arcade.color.BLACK,
-            font_size=FONT_SIZE,
-            font_name="arial",
-        )
 
     def lose_health(self, amount=HEALTH_LOSS_PER_UPDATE):
         """Lose some health.
@@ -187,7 +179,6 @@ class Player(arcade.Sprite):
             self.textures[BASE_ATTACK_RIGHT].width / 2
             - self.textures[FACE_RIGHT].width / 2
         ) * PLAYER_SCALE
-        print(dist)
         self.translate_forward(dist)
         if self.angle == LEFT:
             self.set_texture(BASE_ATTACK_LEFT)
@@ -203,6 +194,37 @@ class Player(arcade.Sprite):
         self.current_health = self.current_health + target.value_when_eaten
         if self.current_health >= MAX_HEALTH:
             self.current_health = MAX_HEALTH
+
+        self.current_score += target.score_when_eaten
+
+    def display_score(
+        self,
+        start_x=(SCREEN_WIDTH / 2) - 15,
+        start_y=SCREEN_HEIGHT / 2,
+        font_size=FONT_SIZE,
+        bold=False,
+    ):
+        current_score_str = str(self.current_score)
+        arcade.draw_text(
+            text="Score: {0}".format(current_score_str),
+            start_x=start_x,
+            start_y=start_y,
+            color=arcade.color.BLACK,
+            font_name="arial",
+            font_size=font_size,
+            bold=bold,
+        )
+
+    def display_health(self):
+        current_health_str = str(round(self.current_health))
+        arcade.draw_text(
+            text="Health: {0}".format(current_health_str),
+            start_x=0,
+            start_y=SCREEN_HEIGHT - 30,
+            color=arcade.color.BLACK,
+            font_size=FONT_SIZE,
+            font_name="arial",
+        )
 
     def reset_after_attack(self):
         dist = (

@@ -1,4 +1,6 @@
 import arcade
+from game_constants import SCREEN_HEIGHT, SCREEN_WIDTH
+
 
 class MainMenu(arcade.Sprite):
     """The game menu"""
@@ -15,6 +17,7 @@ class MainMenu(arcade.Sprite):
         # if this needs updating, put the code here
         pass
 
+
 class PauseMenu(arcade.Sprite):
     """The pause menu"""
 
@@ -27,6 +30,7 @@ class PauseMenu(arcade.Sprite):
     def update(self):
         pass
 
+
 class GameOverMenu(arcade.Sprite):
     """The game over screen/menu"""
 
@@ -35,6 +39,7 @@ class GameOverMenu(arcade.Sprite):
         texture = arcade.load_texture(file_name="game_over.png")
         self.textures.append(texture)
         self.set_texture(0)
+
 
 class ScoreBoard(arcade.Sprite):
     """The game over screen/menu"""

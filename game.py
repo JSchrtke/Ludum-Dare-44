@@ -1,8 +1,8 @@
-# TODO: make score system
 # TODO: SCALE MAX CREATURE COUNT WITH TIME, POTENTIALLY SPEED ASWELL
 # TODO: POTENTIALLY SCALE HEALTH LOSS WITH TIME ASWELL
 # TODO: MAKE POWERUP SYSTEM
 # TODO: make obstacles
+# use built in function to check for distance between sprites, so that the obstacles always have a gap large enough for the player in base state
 # TODO: make proper quit logic
 # TODO: add graphics/assets
 # TODO: make and add sound
@@ -11,6 +11,7 @@
 import arcade
 import os
 import random
+import csv
 from game_constants import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
@@ -55,6 +56,9 @@ class Game(arcade.Window):
         # list for all creature sprites
         self.all_creature_sprites_list = None
 
+        # list for highscores
+        self.high_scores = []
+
         # variable to check if state has changed
         self.state_change = None
         # variable for the new state, after state change
@@ -84,17 +88,20 @@ class Game(arcade.Window):
         # setup the pause menu
         self.pause_menu = PauseMenu()
         self.pause_menu.center_x = SCREEN_WIDTH / 2
-        self.pause_menu.center_y = SCREEN_HEIGHT /2
+        self.pause_menu.center_y = SCREEN_HEIGHT / 2
 
         # setup the game over screen
         self.game_over_screen = GameOverMenu()
         self.game_over_screen.center_x = SCREEN_WIDTH / 2
-        self.game_over_screen.center_y = SCREEN_HEIGHT /2
+        self.game_over_screen.center_y = SCREEN_HEIGHT / 2
+
+        # setup the highscores
+        self.load_scores()
 
         # setup the scoreboard
         self.score_board = ScoreBoard()
         self.score_board.center_x = SCREEN_WIDTH / 2
-        self.score_board.center_y = SCREEN_HEIGHT /2
+        self.score_board.center_y = SCREEN_HEIGHT / 2
 
         # setup the player
         self.player = Player()
@@ -108,6 +115,40 @@ class Game(arcade.Window):
             creature.setup()
             self.all_creature_sprites_list.append(creature)
 
+    def load_scores(self, file_path="scores.txt"):
+        try:
+            with open(file_path, "r") as file:
+                for line in file:
+                    self.high_scores.append(int(line.rstrip()))
+        except FileNotFoundError:
+            print("Error, couldn't find the score file.")
+
+    def save_scores(self, file_path=None):
+        if file_path is None:
+            file_path = "scores.txt"
+
+        with open(file_path, "w") as file:
+            for value in self.high_scores:
+                file.write(str(value) + "\n")
+
+    def display_scores(self):
+        score_pos_y = SCREEN_HEIGHT / 4 * 3
+        font_size = 20
+        for score in self.high_scores:
+            score = str(score)
+            arcade.draw_text(
+                text=score,
+                start_x=SCREEN_WIDTH / 2,
+                start_y=score_pos_y,
+                font_name="arial",
+                font_size=font_size,
+                color=arcade.color.BLACK,
+                align="center",
+                anchor_x="center",
+                anchor_y="center",
+            )
+            score_pos_y += -font_size * 2
+
     def on_draw(self):
         """execute this code whenever window gets drawn"""
         arcade.start_render()
@@ -119,6 +160,12 @@ class Game(arcade.Window):
 
         # when the game is in the pause menu
         if self.state == GameStates.PAUSE_MENU:
+            self.player.display_score(
+                start_x=SCREEN_WIDTH / 2 - 100,
+                start_y=SCREEN_HEIGHT / 2,
+                font_size=50,
+                bold=True,
+            )
             self.pause_menu.draw()
 
         if self.state == GameStates.GAME_OVER:
@@ -126,10 +173,13 @@ class Game(arcade.Window):
 
         if self.state == GameStates.SCORES:
             self.score_board.draw()
+            self.high_scores = sorted(self.high_scores, reverse=True)
+            self.display_scores()
 
         # when the game playing
         if self.state == GameStates.PLAYING:
             self.player.display_health()
+            self.player.display_score(start_x=0, start_y=SCREEN_HEIGHT - 60)
             self.all_creature_sprites_list.draw()
             self.player.draw()
 
@@ -153,7 +203,6 @@ class Game(arcade.Window):
                 self.background.set_texture_change_flag(True)
                 self.reset_all_creatures()
 
-
         if self.get_state_change() is True:
             self.set_state_change(False)
             self.set_old_state()
@@ -167,15 +216,17 @@ class Game(arcade.Window):
 
             if self.state == GameStates.MAIN_MENU:
                 self.background.reset()
+                self.high_scores.append(self.player.current_score)
                 self.player.reset()
                 self.reset_all_creatures()
                 for creature in self.all_creature_sprites_list:
                     creature.reset_to_random_position()
-             
+
             if self.state == GameStates.GAME_OVER:
-                # TODO: put function to display current score here, once score system in place
-                print("handled game over state")  # TODO: DEBUG LINE, REMOVE
-                pass
+                self.display_scores()
+
+            if self.state == GameStates.SCORES:
+                self.score_board.update()
 
     def on_key_press(self, symbol, modifiers):
         if self.state == GameStates.MAIN_MENU:
@@ -186,6 +237,7 @@ class Game(arcade.Window):
                 self.set_state_change(True)
                 self.set_new_state(GameStates.SCORES)
             if symbol == arcade.key.ESCAPE:
+                self.quit()
                 arcade.close_window()
 
         if self.state == GameStates.PLAYING:
@@ -210,9 +262,6 @@ class Game(arcade.Window):
             if symbol == arcade.key.ENTER:
                 self.set_state_change(True)
                 self.set_new_state(GameStates.PLAYING)
-            if symbol == arcade.key.TAB:
-                self.set_state_change(True)
-                self.set_new_state(GameStates.SCORES)
 
         if self.state == GameStates.GAME_OVER:
             if symbol == arcade.key.ESCAPE:
@@ -306,18 +355,16 @@ class Game(arcade.Window):
             self.is_game_paused = True
             for creature in self.all_creature_sprites_list:
                 creature.pause_movement()
-            print(
-                "is game paused: {0}".format(self.is_game_paused)
-            )  # TODO: DEBUG LINE, REMOVE
+
 
     def unpause_game(self):
         if self.is_game_paused:
             self.is_game_paused = False
             for creature in self.all_creature_sprites_list:
                 creature.unpause_movement()
-            print(
-                "is game paused: {0}".format(self.is_game_paused)
-            )  # TODO: DEBUG LINE, REMOVE
+
+    def quit(self):
+        self.save_scores()
 
 
 def main():
