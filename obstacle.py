@@ -3,8 +3,8 @@ import random
 OBSTACLE_TEXTURE_COUNT = 2
 from game_constants import SCREEN_WIDTH, SCREEN_HEIGHT
 PINECONE_SCALE = 0.06
-ROCK_SCALE = 0.02
-LEAF_SCALE = 0.02
+ROCK_SCALE = 0.05
+LEAF_SCALE = 0.05
 
 class Obstacle(arcade.Sprite):
     def __init__(self):

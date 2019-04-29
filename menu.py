@@ -8,7 +8,7 @@ class MainMenu(arcade.Sprite):
     def __init__(self):
         """Initialize menu sprite."""
         super().__init__()
-        texture = arcade.load_texture(file_name="crude_menu.png")
+        texture = arcade.load_texture(file_name="main_menu.png")
         self.textures.append(texture)
         self.set_texture(0)
 
@@ -16,6 +16,8 @@ class MainMenu(arcade.Sprite):
         """Update the menu."""
         # if this needs updating, put the code here
         pass
+
+
 
 
 class PauseMenu(arcade.Sprite):

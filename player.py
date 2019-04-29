@@ -19,11 +19,11 @@ BASE_ATTACK = 0
 SPIN_ATTACK = 1
 FREEZE_ATTACK = 2
 TELEPORT = 3
-SPIN_ATTACK_COST = 50
+SPIN_ATTACK_COST = 80
 FREEZE_ATTACK_COST = 20
 TELEPORT_COST = 5
 BULLET_SPEED = 30
-TELEPORT_DISTANCE = 200
+TELEPORT_DISTANCE = 400
 
 
 
@@ -91,9 +91,9 @@ class Player(arcade.Sprite):
 
         # attack count variables
         # TODO: SET THIS TO ZERO AGAIN
-        self.spin_attack_amount = 1000
-        self.freeze_attack_amount = 1000
-        self.teleport_amount = 1000
+        self.spin_attack_amount = 0
+        self.freeze_attack_amount = 0
+        self.teleport_amount = 0
 
         # score variables
         self.current_score = 0
@@ -380,7 +380,7 @@ class Player(arcade.Sprite):
             text="Score: {0}".format(current_score_str),
             start_x=start_x,
             start_y=start_y,
-            color=arcade.color.BLACK,
+            color=arcade.color.OUTRAGEOUS_ORANGE,
             font_name="arial",
             font_size=font_size,
             bold=bold,
@@ -392,7 +392,36 @@ class Player(arcade.Sprite):
             text="Health: {0}".format(current_health_str),
             start_x=0,
             start_y=SCREEN_HEIGHT - 30,
-            color=arcade.color.BLACK,
+            color=arcade.color.OUTRAGEOUS_ORANGE,
+            font_size=FONT_SIZE,
+            font_name="arial",
+        )
+
+    def display_attack_counts(self):
+        spin_attack_count = str(self.spin_attack_amount)
+        freeze_attack_count = str(self.freeze_attack_amount)
+        teleport_amount = str(self.teleport_amount)
+        arcade.draw_text(
+            text="Spin attack: {0}".format(spin_attack_count),
+            start_x=200,
+            start_y=SCREEN_HEIGHT - 30,
+            color=arcade.color.OUTRAGEOUS_ORANGE,
+            font_size=FONT_SIZE,
+            font_name="arial",
+        )
+        arcade.draw_text(
+            text="Freeze attack: {0}".format(freeze_attack_count),
+            start_x=450,
+            start_y=SCREEN_HEIGHT - 30,
+            color=arcade.color.OUTRAGEOUS_ORANGE,
+            font_size=FONT_SIZE,
+            font_name="arial",
+        )
+        arcade.draw_text(
+            text="Teleport: {0}".format(teleport_amount),
+            start_x=750,
+            start_y=SCREEN_HEIGHT - 30,
+            color=arcade.color.OUTRAGEOUS_ORANGE,
             font_size=FONT_SIZE,
             font_name="arial",
         )

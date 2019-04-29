@@ -1,4 +1,4 @@
-# TODO: add graphics/assets
+# TODO: MAKE MENUS PRETTY
 # TODO: make and add sound
 # TODO: MAKE CREATURES STARTLE WHEN OTHERS GET KILLED, INCREASE THEIR SPEED
 # TODO: IF TIME PERMITTING, MAKE actual healthbar
@@ -27,12 +27,10 @@ from player import (
     RIGHT,
     LEFT,
     UP,
-    DOWN
+    DOWN,
 )
 from creature import Moth, Bug
 from obstacle import Obstacle
-
-
 
 
 class Game(arcade.Window):
@@ -128,7 +126,7 @@ class Game(arcade.Window):
         # setup the creatures
         self.all_creature_sprites_list = arcade.SpriteList()
         for i in range(self.current_creature_amount):
-            rand = random.randint(1,2)
+            rand = random.randint(1, 2)
             if rand == 1:
                 creature = Moth()
             elif rand == 2:
@@ -188,13 +186,9 @@ class Game(arcade.Window):
 
         # when the game is in the pause menu
         if self.state == GameStates.PAUSE_MENU:
-            self.player.display_score(
-                start_x=SCREEN_WIDTH / 2 - 100,
-                start_y=SCREEN_HEIGHT / 2,
-                font_size=50,
-                bold=True,
-            )
+            self.player.display_score(start_x=0, start_y=SCREEN_HEIGHT - 60)
             self.player.display_health()
+            self.player.display_attack_counts()
             self.pause_menu.draw()
 
         if self.state == GameStates.GAME_OVER:
@@ -213,11 +207,12 @@ class Game(arcade.Window):
 
         # when the game playing
         if self.state == GameStates.PLAYING:
-            self.player.display_health()
-            self.player.display_score(start_x=0, start_y=SCREEN_HEIGHT - 60)
             self.all_creature_sprites_list.draw()
             self.player.draw()
             self.all_obstacle_sprite_list.draw()
+            self.player.display_health()
+            self.player.display_score(start_x=0, start_y=SCREEN_HEIGHT - 60)
+            self.player.display_attack_counts()
             if self.player.freeze_bullet is not None:
                 self.player.freeze_bullet.draw()
 
@@ -229,9 +224,15 @@ class Game(arcade.Window):
         if self.obstacle_mess_up_counter < 3:
             self.all_obstacle_sprite_list.update()
             for obstacle in self.all_obstacle_sprite_list:
-                if len(arcade.check_for_collision_with_list(obstacle, self.all_obstacle_sprite_list)) > 0:
+                if (
+                    len(
+                        arcade.check_for_collision_with_list(
+                            obstacle, self.all_obstacle_sprite_list
+                        )
+                    )
+                    > 0
+                ):
                     obstacle.randomize_position()
-            
 
         if not self.is_game_paused:
             # scale max creature amount with game time
@@ -239,7 +240,6 @@ class Game(arcade.Window):
             if self.game_update_counter % 600 == 0:
                 if self.current_creature_amount > 0:
                     self.current_creature_amount += -1
-
 
             self.background.update()
             self.player.update()
@@ -430,10 +430,17 @@ class Game(arcade.Window):
         for creature in self.all_creature_sprites_list:
             creature.kill()
         for i in range(self.current_creature_amount):
-            creature = Moth()
+            rand = random.randint(1, 2)
+            if rand == 1:
+                creature = Moth()
+            elif rand == 2:
+                creature = Bug()
             creature.setup()
             self.all_creature_sprites_list.append(creature)
-            if len(self.all_creature_sprites_list) >= self.current_creature_amount:
+            if (
+                len(self.all_creature_sprites_list)
+                >= self.current_creature_amount
+            ):
                 break
 
     def reset_all_obstacles(self):
@@ -469,9 +476,16 @@ class Game(arcade.Window):
             if len(collision_list) > 0:
                 if not creature.frozen:
                     creature.reverse_movement()
-        
+
         if self.player.is_attacking is False:
-            if len(arcade.check_for_collision_with_list(self.player, self.all_obstacle_sprite_list)) > 0:
+            if (
+                len(
+                    arcade.check_for_collision_with_list(
+                        self.player, self.all_obstacle_sprite_list
+                    )
+                )
+                > 0
+            ):
                 if self.player.angle == RIGHT:
                     self.player.stop()
                     self.player.center_x += -self.player.collision_radius * 0.1
@@ -484,8 +498,6 @@ class Game(arcade.Window):
                 if self.player.angle == DOWN:
                     self.player.stop()
                     self.player.center_y += self.player.collision_radius * 0.1
-
-
 
 
 def main():
