@@ -20,4 +20,7 @@ Should that not work, please check out the arcade library documentation for help
 
 http://arcade.academy/installation.html
 
+
+After installing the required things, run the game by opening "game.py" with Python
+
 Thank you for trying my game, I hope you liked it.
