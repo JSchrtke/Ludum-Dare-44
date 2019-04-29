@@ -117,6 +117,10 @@ class Player(arcade.Sprite):
         self.current_session_scores_list.append(self.current_score)
         self.current_score = 0
         self.dead = False
+        self.current_health = MAX_HEALTH
+        self.spin_attack_amount = 0
+        self.freeze_attack_amount = 0
+        self.teleport_amount = 0
 
     def select_attack_type(self, attack_type):
         """Select an attack type

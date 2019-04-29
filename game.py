@@ -158,7 +158,7 @@ class Game(arcade.Window):
                 file.write(str(value) + "\n")
 
     def display_scores(self):
-        score_pos_y = SCREEN_HEIGHT / 4 * 3
+        score_pos_y = SCREEN_HEIGHT / 3 * 2
         font_size = 20
         for score in self.high_scores:
             score = str(score)
@@ -167,11 +167,12 @@ class Game(arcade.Window):
                 start_x=SCREEN_WIDTH / 2,
                 start_y=score_pos_y,
                 font_name="arial",
-                font_size=font_size,
+                font_size=40,
                 color=arcade.color.BLACK,
                 align="center",
                 anchor_x="center",
                 anchor_y="center",
+                bold=True
             )
             score_pos_y += -font_size * 2
 
@@ -278,6 +279,7 @@ class Game(arcade.Window):
                 self.high_scores.append(self.player.current_score)
                 self.player.reset()
                 self.reset_all_creatures()
+                self.reset_all_obstacles()
                 for creature in self.all_creature_sprites_list:
                     creature.reset_to_random_position()
 
@@ -475,6 +477,7 @@ class Game(arcade.Window):
             )
             if len(collision_list) > 0:
                 if not creature.frozen:
+                    creature.center_x += creature.collision_radius *0.1
                     creature.reverse_movement()
 
         if self.player.is_attacking is False:
